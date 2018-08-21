@@ -28,6 +28,7 @@ public class StravaController {
 
         HttpEntity<String> entity = new HttpEntity<String>(headers);
 
+        //TODO: map this to one of my own objects instead of a string.
         String response = restTemplate.exchange("https://www.strava.com/api/v3/athletes/" + stravaAthleteId + "/stats?page=1&per_page=30", HttpMethod.GET, entity, String.class).getBody();
 
         return new ResponseEntity<String>(response, HttpStatus.OK);
