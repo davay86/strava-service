@@ -6,14 +6,25 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 public class StravaStats {
 
     @JsonProperty("all_run_totals")
-    private AllRunTotals allRunTotals;
+    private AllTotals allRunTotals;
 
-    public AllRunTotals getAllRunTotals() {
+    @JsonProperty("all_ride_totals")
+    private AllTotals allRideTotals;
+
+    public AllTotals getAllRunTotals() {
         return allRunTotals;
     }
 
-    public void setAllRunTotals(AllRunTotals allRunTotals) {
+    public void setAllRunTotals(AllTotals allRunTotals) {
         this.allRunTotals = allRunTotals;
+    }
+
+    public AllTotals getAllRideTotals() {
+        return allRideTotals;
+    }
+
+    public void setAllRideTotals(AllTotals allRideTotals) {
+        this.allRideTotals = allRideTotals;
     }
 
     @Override
