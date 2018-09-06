@@ -1,7 +1,8 @@
 package org.murhanmik.controller;
 
-import org.murhanmik.model.ActivityDetail;
+import org.murhanmik.model.AveragePaceForRun;
 import org.murhanmik.model.StravaStats;
+import org.murhanmik.model.strava.responses.ActivityDetail;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,13 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 public class StravaController {
 
+    public static final int SECONDS_PER_MINUTE = 60;
+    public static final double METRES_PER_MILE = 1609.344;
     @Value("${strava.token}")
     private String stravaToken;
 
@@ -38,7 +41,7 @@ public class StravaController {
     }
 
     @GetMapping(value = "/getMinPerMileRuns", produces = "application/json")
-    public ResponseEntity<List<ActivityDetail>> getMinPerMileRuns() throws IOException {
+    public ResponseEntity<List<AveragePaceForRun>> getMinPerMileRuns() throws IOException {
 
         //TODO: Remove this to be a bean creation in config
         RestTemplate restTemplate = new RestTemplate();
@@ -49,12 +52,23 @@ public class StravaController {
 
         HttpEntity<String> entity = new HttpEntity<String>(headers);
 
-        List<ActivityDetail> activityDetails = Arrays.asList(restTemplate.exchange("https://www.strava.com/api/v3/athlete/activities?per_page=200", HttpMethod.GET, entity, ActivityDetail[].class).getBody());
+        List<ActivityDetail> activityDetails = Arrays.asList(restTemplate.exchange("https://www.strava.com/api/v3/athlete/activities?per_page=200",
+                HttpMethod.GET,
+                entity,
+                ActivityDetail[].class).getBody());
 
-        List<ActivityDetail> runDetails = activityDetails.stream().filter(e -> e.getType().equals("Run")).collect(Collectors.<ActivityDetail>toList());
+        List<AveragePaceForRun> averagePaceForRuns = new ArrayList<>();
 
-        return new ResponseEntity<>(runDetails, HttpStatus.OK);
+        activityDetails.stream().filter(e -> e.getType().equals("Run")).forEach(e -> averagePaceForRuns.add(
+                new AveragePaceForRun(e.getActivityId(),
+                        e.getStartDate(),
+                        calculateAveragePace(e.getDistance(), e.getMovingTime()))));
 
+        return new ResponseEntity<>(averagePaceForRuns, HttpStatus.OK);
 
+    }
+
+    private double calculateAveragePace(String distance, String movingTime) {
+        return (Double.parseDouble(movingTime) / SECONDS_PER_MINUTE) / (Double.parseDouble(distance) / METRES_PER_MILE);
     }
 }

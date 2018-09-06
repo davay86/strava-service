@@ -1,4 +1,4 @@
-package org.murhanmik.model;
+package org.murhanmik.model.strava.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -50,6 +50,14 @@ public class ActivityDetail {
 
     public void setMovingTime(String movingTime) {
         this.movingTime = movingTime;
+    }
+
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
     }
 
     @Override
